@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import * as z from "zod";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const formSchema = z.object({
     email: z.string().email("Provide a valid email").min(6).max(100),
     phone: z.string().min(1),
@@ -15,12 +15,15 @@ const formSchema = z.object({
     team: z.string(),
     position: z.string().min(1)
 });
+export async function invite(values: z.infer<typeof formSchema>) {
+    // Validate the input using the schema
+    const validatedValues = formSchema.parse(values);
 
-export async function invite(values: z.infer < typeof formSchema > ) {
     const supabase = await createClient();
-    const loggedInUser = await supabase.auth.getUser()
+    const loggedInUser = await supabase.auth.getUser();
+
     const { error, data } = await supabase.auth.signUp({
-        email:values.email,
+        email: validatedValues.email,
         password: "password",
         options: {
             emailRedirectTo: 'http://localhost:3000/onboarding',
@@ -32,18 +35,20 @@ export async function invite(values: z.infer < typeof formSchema > ) {
         return `EMP${num}`;
     }
 
-    if(error) throw error;
+    if (error) throw error;
+
     await supabase.rpc("create_user_profile", {
-        p_email: values.email,
+        p_email: validatedValues.email,
         p_inviter_id: loggedInUser?.data?.user?.id,
-        p_phone_number: values.phone,
-        p_position: values.position,
-        p_role: values.role,
-        p_team_id: values.team,
-        p_type: values.type,
+        p_phone_number: validatedValues.phone,
+        p_position: validatedValues.position,
+        p_role: validatedValues.role,
+        p_team_id: validatedValues.team,
+        p_type: validatedValues.type,
         p_user_id: data?.user?.id,
         p_emp_no: generateRandomEmployeeID()
     });
-    revalidatePath('/team/all-users', 'layout')
-    redirect('/team/all-users')
+
+    revalidatePath('/team/all-users', 'layout');
+    redirect('/team/all-users');
 }
