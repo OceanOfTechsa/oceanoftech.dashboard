@@ -19,7 +19,7 @@ interface AuthProps {
 const AuthForm: React.FC<AuthProps> = ({hideEmailField = false, BtnIcon, action = "login", variant = "login"}) => {
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (formData) => {
+    const handleSubmit = async (formData: any) => {
         setLoading(true);
         await login(formData);
     }

@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import * as z from "zod";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formSchema = z.object({
     email: z.string().email("Provide a valid email").min(6).max(100),
     phone: z.string().min(1),
