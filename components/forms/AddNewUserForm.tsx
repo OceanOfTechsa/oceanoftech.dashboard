@@ -41,8 +41,7 @@ import Image from "next/image";
 import {useState} from "react";
 import Loader from "@/components/loader";
 import {invite} from "@/app/(portal)/(CardPages)/team/add-user/actions";
-import {GetAllTeams} from "@/db/actions/GetAllTeams";
-
+import { createClient } from '@/utils/supabase/client'
 const formSchema = z.object({
     email: z.string().email("Provide a valid email").min(6).max(100),
     phone: z.string().min(1),
@@ -51,9 +50,13 @@ const formSchema = z.object({
     team: z.string(),
     position: z.string().min(1)
 });
+const supabase =  createClient();
 
+const {data: teams} = await supabase.from("teams")
+    .select("*")
+    .eq('is_active', 1)
+    .order('created_at', { ascending: false });
 
-const teams = await GetAllTeams(); //TODO Move to a sever component to avoid waterfall
 export default function AddNewUserForm() {
     const [isLoading, setIsLoading] = useState(false);
     const form = useForm < z.infer < typeof formSchema >> ({
